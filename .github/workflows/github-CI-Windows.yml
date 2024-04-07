@@ -1,6 +1,7 @@
 name: wget-for-windows CI
 
-on: [push, pull_request]
+on: 
+  workflow_dispatch:
 
 jobs:
   # Customize the env and configure args
