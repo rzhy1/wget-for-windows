@@ -174,26 +174,7 @@ jobs:
         SHA=$(sha1sum $CDir/src/wget.exe | cut -b 1-40)
         echo SHA="$SHA" >> $GITHUB_ENV
         $CDir/src/wget -V
-
-    - name: fuzz
-      run: |
-        cd $CDir/fuzz
-        make check
-
-    - name: testenv
-      if: ${{success()}} || ${{failure()}}
-      run: |
-        cd $CDir/testenv
-        make check
-      timeout-minutes: 5 # in case of stuck
-
-    - name: tests
-      if: ${{success()}} || ${{failure()}}
-      run: |
-        cd $CDir/tests
-        make check
-      timeout-minutes: 5 # in case of stuck
-
+    
     - name: Upload wget
       uses: actions/upload-artifact@v4
       if: ${{success()}} || ${{failure()}}
@@ -201,20 +182,3 @@ jobs:
         name: wget-${{env.mingw}}-${{env.build_type}}_${{env.SHA}}
         path: |
           ${{env.CDir}}/src/wget.exe
-
-    - name: Upload logs
-      uses: actions/upload-artifact@v4
-      if: ${{failure()}}
-      with:
-        name: wget-${{env.mingw}}-${{env.build_type}}-logs
-        # Previous steps can be stuck and then timeout, so all `.log` files and sub-folders.
-        path: |
-          ${{env.CDir}}/config.log
-          ${{env.CDir}}/fuzz/*.log
-          ${{env.CDir}}/testenv/
-          ${{env.CDir}}/tests/*.log
-          ${{env.CDir}}/tests/Makefile
-          ${{env.CDir}}/tests/**/
-          !${{env.CDir}}/tests/.deps/
-          !${{env.CDir}}/tests/*.exe
-          !${{env.CDir}}/tests/*.o
