@@ -66,6 +66,7 @@ jobs:
           git
           python
           libcares-devel
+          gcc
           mingw-w64-${{env.arch}}-gcc
           mingw-w64-${{env.arch}}-expat
           mingw-w64-${{env.arch}}-gpgme
@@ -73,6 +74,8 @@ jobs:
           mingw-w64-${{env.arch}}-libidn2
           mingw-w64-${{env.arch}}-libunistring
           mingw-w64-${{env.arch}}-gettext
+          mingw-w64-${{env.arch}}-pcre2  
+          mingw-w64-${{env.arch}}-zlib
 
       # In here, test requires linux flavor python!
     - name: Hack python
@@ -156,7 +159,7 @@ jobs:
         pwd
         export CFLAGS+=" -Wall -D_WIN32_WINNT=0x0600 -DGNULIB_defined_ESOCK"
         if [ "${{matrix.ftype}}" = "static-full" ]; then
-          CFLAGS+=" -O2" $BRoot/configure --prefix=$BRoot/$BDir --disable-rpath --with-cares --with-winidn --enable-threads=windows
+          CFLAGS+=" -Os" LDFLAGS="-static -s" $BRoot/configure --prefix=$BRoot/$BDir --disable-rpath --with-cares --with-winidn --enable-threads=windows
         elif [ "${{matrix.ftype}}" = "static-lite" ]; then
           CFLAGS+=" -Os" LDFLAGS="-static -s" $BRoot/configure --prefix=$BRoot/$BDir --disable-debug --disable-rpath --disable-nls --without-libpsl --without-metalink --disable-pcre --disable-pcre2 --with-winidn --enable-threads=windows
         fi
