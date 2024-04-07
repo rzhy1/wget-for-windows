@@ -155,7 +155,6 @@ jobs:
         cd $CDir
         pwd
         export CFLAGS+=" -Wall -D_WIN32_WINNT=0x0600 -DGNULIB_defined_ESOCK"
-        export LDFLAGS="-Wl,--version-script=.prev-version"
         if [ "${{matrix.ftype}}" = "static-full" ]; then
           CFLAGS+=" -O2" $BRoot/configure --prefix=$BRoot/$BDir --disable-rpath --with-cares --with-winidn --enable-threads=windows
         elif [ "${{matrix.ftype}}" = "static-lite" ]; then
