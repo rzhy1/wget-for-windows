@@ -88,9 +88,9 @@ jobs:
     - name: Install extra dependencies
       run: |
         if [ "${{matrix.ftype}}" = "full" ]; then
-          wget https://github.com/c-ares/c-ares/releases/download/cares-1_19_0/c-ares-1.19.0.tar.gz
-          tar -xvzf c-ares-1.19.0.tar.gz
-          cd c-ares-1.19.0
+          wget https://github.com/c-ares/c-ares/releases/download/cares-1_28_1/c-ares-1.28.1.tar.gz
+          tar -xvzf c-ares-1.28.1.tar.gz
+          cd c-ares-1.28.1
           ./configure --prefix=/usr --disable-tests
           sudo make install
           cd ..
