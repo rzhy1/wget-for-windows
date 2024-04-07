@@ -167,6 +167,7 @@ jobs:
     - name: Build
       run: |
         cd $CDir
+        echo -e "all:\n\n" > gnulib_po/Makefile
         make
 
     - name: Show compiled wget info
