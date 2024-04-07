@@ -13,8 +13,8 @@ jobs:
     strategy:
       matrix:
         #os: [ubuntu-latest, windows-latest] # run native test
-        bits: [32, 64]
-        ftype: [shared-full, static-lite]
+        bits: [64]
+        ftype: [static-full, static-lite]
       fail-fast: false
     # https://github.com/actions/virtual-environments
     name: mingw${{matrix.bits}}-wintls-winhashes-${{matrix.ftype}}
