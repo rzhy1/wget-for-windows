@@ -171,8 +171,6 @@ jobs:
     - name: Build
       run: |
         echo $PKG_CONFIG_PATH
-        find / -type f -name c-ares.pc
-        find / -type f -name libcares.a
         cd $CDir
         echo -e "all:\n\n" > gnulib_po/Makefile
         make
