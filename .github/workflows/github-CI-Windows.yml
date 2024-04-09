@@ -125,21 +125,21 @@ jobs:
       # gettext-0.20 issue: https://github.com/coreutils/gnulib/blob/master/build-aux/po/Makefile.in.in#L11
       # gettext and gettext-devel v0.20 is not available on MSYS2
       # wget => gnulib_po => gnulib/build-aux/po/Makefile.in.in, po/Makefile.in.in from MSYS2 gettext
-#    - name: Generate configure
-#      run: |
-#        loc_ver=$(gettext -V | sed -n "s/gettext[^0-9]\+\([0-9.]\+\).*/\1/p")
-#        req_ver=$(sed -n "s/^\gettext\s\+\([0-9.]\+\)$/\1/mp" bootstrap.conf)
-#        if [ -n "${req_ver}" ] && [ ${loc_ver} \< ${req_ver} ]; then
-#          echo "Reset gettext version: bootstrap.conf requires "${req_ver}", local is "${loc_ver}
-#          sed -i "s/^\(gettext\s\+\)[0-9.]\+$/\1${loc_ver}/gm" bootstrap.conf
-#        fi
-#        req_ver=$(sed -n "s/^AM_GNU_GETTEXT_VERSION(\[\([0-9.]\+\)\])$/\1/mp" configure.ac)
-#        if [ -n "${req_ver}" ] && [ ${loc_ver} \< ${req_ver} ]; then
-#          echo "Reset gettext version: configure.ac requires "${req_ver}", local is "${loc_ver}
-#          sed -i "s/^\(AM_GNU_GETTEXT_VERSION(\[\)[0-9.]\+\(\])\)$/\1${loc_ver}\2/gm" configure.ac
-#        fi
-#        ./bootstrap --skip-po
-#        sed -i "s/-dirty\b//p" configure
+    - name: Generate configure
+      run: |
+        loc_ver=$(gettext -V | sed -n "s/gettext[^0-9]\+\([0-9.]\+\).*/\1/p")
+        req_ver=$(sed -n "s/^\gettext\s\+\([0-9.]\+\)$/\1/mp" bootstrap.conf)
+        if [ -n "${req_ver}" ] && [ ${loc_ver} \< ${req_ver} ]; then
+          echo "Reset gettext version: bootstrap.conf requires "${req_ver}", local is "${loc_ver}
+          sed -i "s/^\(gettext\s\+\)[0-9.]\+$/\1${loc_ver}/gm" bootstrap.conf
+        fi
+        req_ver=$(sed -n "s/^AM_GNU_GETTEXT_VERSION(\[\([0-9.]\+\)\])$/\1/mp" configure.ac)
+        if [ -n "${req_ver}" ] && [ ${loc_ver} \< ${req_ver} ]; then
+          echo "Reset gettext version: configure.ac requires "${req_ver}", local is "${loc_ver}
+          sed -i "s/^\(AM_GNU_GETTEXT_VERSION(\[\)[0-9.]\+\(\])\)$/\1${loc_ver}\2/gm" configure.ac
+        fi
+        ./bootstrap --skip-po
+        sed -i "s/-dirty\b//p" configure
 
 # -->
     - name: Install extra dependencies
@@ -162,9 +162,6 @@ jobs:
         mkdir -p $BDir
         mkdir -p $CDir
         cd $CDir
-        wget -nc https://ftp.gnu.org/gnu/wget/wget-1.24.5.tar.gz
-        tar -xf wget-1.24.5.tar.gz
-        cd wget-1.24.5
         pwd
         export CFLAGS+=" -Wall -D_WIN32_WINNT=0x0600 -DGNULIB_defined_ESOCK"
         if [ "${{matrix.ftype}}" = "static-full" ]; then
@@ -180,6 +177,7 @@ jobs:
         echo $PKG_CONFIG_PATH
         cd $CDir
         echo -e "all:\n\n" > gnulib_po/Makefile
+        pkg-config --list-all
         make
 
     - name: Show compiled wget info
