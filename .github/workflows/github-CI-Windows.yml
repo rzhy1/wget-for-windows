@@ -167,7 +167,7 @@ jobs:
         if [ "${{matrix.ftype}}" = "static-full" ]; then
           CFLAGS+=" -Os" LDFLAGS="-static -s" $BRoot/configure --prefix=$BRoot/$BDir --disable-rpath --with-cares --with-winidn --enable-threads=windows
         elif [ "${{matrix.ftype}}" = "static-lite" ]; then
-          CFLAGS+=" -Os" LDFLAGS="-static -s" $BRoot/configure --prefix=$BRoot/$BDir --disable-debug --disable-rpath --disable-nls --without-libpsl --without-metalink --disable-pcre --disable-pcre2 --with-winidn --enable-threads=windows
+          CFLAGS+=" -Os" LDFLAGS="-static -s" $BRoot/configure --prefix=$BRoot/$BDir  --enable-threads=windows
         fi
 # <--
 
