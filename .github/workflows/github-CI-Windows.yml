@@ -65,12 +65,14 @@ jobs:
           autoconf-archive
           git
           python
+          libcares
           libcares-devel
           gcc
           mingw-w64-${{env.arch}}-gcc
           mingw-w64-${{env.arch}}-expat
           mingw-w64-${{env.arch}}-gpgme
           mingw-w64-${{env.arch}}-libpsl
+          mingw-w64-${{env.arch}}-libcares
           mingw-w64-${{env.arch}}-libidn2
           mingw-w64-${{env.arch}}-libunistring
           mingw-w64-${{env.arch}}-gettext
@@ -80,7 +82,6 @@ jobs:
       # In here, test requires linux flavor python!
     - name: Hack python
       run: |
-        find / -name c-ares.pc
         python -V
         python -c "import sys; print(sys.executable)"
         python3 -V
