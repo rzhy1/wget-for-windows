@@ -72,7 +72,7 @@ jobs:
           mingw-w64-${{env.arch}}-expat
           mingw-w64-${{env.arch}}-gpgme
           mingw-w64-${{env.arch}}-libpsl
-          mingw-w64-${{env.arch}}-libcares
+          mingw-w64-${{env.arch}}-python-pycares
           mingw-w64-${{env.arch}}-libidn2
           mingw-w64-${{env.arch}}-libunistring
           mingw-w64-${{env.arch}}-gettext
