@@ -80,7 +80,7 @@ jobs:
           mingw-w64-${{env.arch}}-zlib
     - name: 更新 MSYS2 软件包数据库和已安装软件包
       run: |
-        pacman -Sc
+        yes | pacman -Sc
         yes | pacman -Syu
       
       # In here, test requires linux flavor python!
