@@ -80,6 +80,7 @@ jobs:
       # In here, test requires linux flavor python!
     - name: Hack python
       run: |
+        find / -name c-ares.pc
         python -V
         python -c "import sys; print(sys.executable)"
         python3 -V
