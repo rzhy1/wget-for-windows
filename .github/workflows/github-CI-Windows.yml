@@ -169,6 +169,7 @@ jobs:
         export CFLAGS+=" -Wall -D_WIN32_WINNT=0x0600 -DGNULIB_defined_ESOCK"
         export CFLAGS+= `pkg-config --cflags c-ares`
         export LDFLAGS+= `pkg-config --libs c-ares`
+        export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
         if [ "${{matrix.ftype}}" = "static-full" ]; then
           CFLAGS+=" -Os" LDFLAGS="-static -s" $BRoot/configure --prefix=$BRoot/$BDir --disable-rpath --with-cares --with-winidn --enable-threads=windows
         elif [ "${{matrix.ftype}}" = "static-lite" ]; then
