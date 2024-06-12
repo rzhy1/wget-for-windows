@@ -178,7 +178,7 @@ jobs:
         cd $CDir
         echo -e "all:\n\n" > gnulib_po/Makefile
         pkg-config --list-all
-        make
+        make -j$(nproc)
 
     - name: Show compiled wget info
       run: |
