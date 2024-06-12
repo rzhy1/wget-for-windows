@@ -165,7 +165,7 @@ jobs:
         pwd
         export CFLAGS+=" -Wall -D_WIN32_WINNT=0x0600 -DGNULIB_defined_ESOCK"
         if [ "${{matrix.ftype}}" = "static-full" ]; then
-          CFLAGS+=" -Os" LDFLAGS="-static -s" $BRoot/configure --prefix=$BRoot/$BDir --disable-rpath --with-cares --with-winidn --enable-threads=windows
+          CFLAGS+="-DGNUTLS_INTERNAL_BUILD=1 -DCARES_STATICLIB=1 -DPCRE2_STATIC=1 -DNDEBUG -O2 -march=$WGET_ARCH -mtune=generic" LDFLAGS="-static -static-libgcc" $BRoot/configure --prefix=$BRoot/$BDir --disable-debug --disable-valgrind-tests --enable-iri --enable-pcre2 --with-ssl=gnutls --with-included-libunistring --with-cares --with-libpsl --with-metalink 
         elif [ "${{matrix.ftype}}" = "static-lite" ]; then
           CFLAGS+=" -Os" LDFLAGS="-static -s" $BRoot/configure --prefix=$BRoot/$BDir  --enable-threads=windows
         fi
