@@ -145,16 +145,18 @@ jobs:
     - name: Install extra dependencies
       run: |
         if [ "${{matrix.ftype}}" = "static-full" ]; then
-          wget https://github.com/metalink-dev/libmetalink/releases/download/release-0.1.3/libmetalink-0.1.3.tar.gz
-          tar -xvzf libmetalink-0.1.3.tar.gz
+          # 使用缓存
+          wget https://github.com/metalink-dev/libmetalink/releases/download/release-0.1.3/libmetalink-0.1.3.tar.gz || exit 1
+          tar -xvzf libmetalink-0.1.3.tar.gz || exit 1
           cd libmetalink-0.1.3
-          ./configure --disable-xmltest
-          make install
+          ./configure --disable-xmltest || exit 1
+          make install || exit 1
         elif [ "${{matrix.ftype}}" = "static-lite" ]; then
-          wget https://github.com/win-iconv/win-iconv/archive/refs/tags/v0.0.8.tar.gz
-          tar -xvzf v0.0.8.tar.gz
+          # 使用缓存
+          wget https://github.com/win-iconv/win-iconv/archive/refs/tags/v0.0.8.tar.gz || exit 1
+          tar -xvzf v0.0.8.tar.gz || exit 1
           cd win-iconv-0.0.8
-          make -E CFLAGS=-Os -E prefix=/$mingw install
+          make -E CFLAGS=-Os -E prefix=/$mingw install || exit 1
         fi
 
     - name: configure
@@ -163,11 +165,13 @@ jobs:
         mkdir -p $CDir
         cd $CDir
         pwd
-        export CFLAGS+=" -Wall -D_WIN32_WINNT=0x0600 -DGNULIB_defined_ESOCK"
+        # 合并 CFLAGS 和 LDFLAGS 定义，并移除冗余选项
+        CFLAGS="-Os -Wall -D_WIN32_WINNT=0x0600"
+        LDFLAGS="-static -s"
         if [ "${{matrix.ftype}}" = "static-full" ]; then
-          CFLAGS+="-DGNUTLS_INTERNAL_BUILD=1 -DCARES_STATICLIB=1 -DPCRE2_STATIC=1 -DNDEBUG -O2 -march=$WGET_ARCH -mtune=generic" LDFLAGS="-static -static-libgcc" $BRoot/configure --prefix=$BRoot/$BDir --disable-debug --disable-valgrind-tests --enable-iri --enable-pcre2 --with-ssl=gnutls --with-included-libunistring --with-cares --with-libpsl --with-metalink 
+          $BRoot/configure --prefix=$BRoot/$BDir --disable-debug --disable-valgrind-tests --enable-iri --enable-pcre2 --with-included-libunistring --with-cares --with-libpsl --with-metalink --host="x86_64-w64-mingw32" || exit 1
         elif [ "${{matrix.ftype}}" = "static-lite" ]; then
-          CFLAGS+=" -Os" LDFLAGS="-static -s" $BRoot/configure --prefix=$BRoot/$BDir  --enable-threads=windows
+          $BRoot/configure --prefix=$BRoot/$BDir --enable-threads=windows --host="x86_64-w64-mingw32" || exit 1
         fi
 # <--
 
@@ -176,9 +180,8 @@ jobs:
       run: |
         echo $PKG_CONFIG_PATH
         cd $CDir
-        echo -e "all:\n\n" > gnulib_po/Makefile
         pkg-config --list-all
-        make -j$(nproc)
+        make -j$(nproc) || exit 1
 
     - name: Show compiled wget info
       run: |
