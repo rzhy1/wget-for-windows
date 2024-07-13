@@ -77,6 +77,7 @@ jobs:
         cd $CDir
         echo -e "all:\n\n" > gnulib_po/Makefile
         make
+        echo $PWD
         strip /src/wget.exe
         cp -fv /src/wget.exe /src/wget0.exe
 
