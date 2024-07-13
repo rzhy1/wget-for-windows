@@ -46,11 +46,10 @@ jobs:
           libcares-devel
           mingw-w64-${{env.arch}}-gcc
           mingw-w64-${{env.arch}}-gettext
-          mingw-w64-${{env.arch}}-strip
 
     # 克隆指定的仓库
     - name: Clone wget repository
-      run: git clone --branch v1.24.5.179-83965 https://github.com/lifenjoiner/wget-for-windows.git wget
+      run: git clone  https://github.com/lifenjoiner/wget-for-windows.git wget
 
     - name: Generate configure
       run: |
@@ -78,7 +77,7 @@ jobs:
         cd $CDir
         echo -e "all:\n\n" > gnulib_po/Makefile
         make -j$(nproc)
-        mingw-w64-${{env.arch}}-strip /src/wget.exe
+        strip ${PWD}/src/wget.exe
         cp -fv /src/wget.exe /src/wget0.exe
 
     - name: Show compiled wget info
