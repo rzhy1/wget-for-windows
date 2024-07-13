@@ -79,6 +79,7 @@ jobs:
         make -j$(nproc)
         strip ${PWD}/src/wget.exe
         cp -fv ${PWD}/src/wget.exe ${PWD}/src/wget0.exe
+        find "${PWD}" -name ".version" -print
 
     - name: Show compiled wget info
       run: |
@@ -96,7 +97,7 @@ jobs:
           ${{env.CDir}}/src/wget0.exe
     - name: Get version number
       run: |
-        VERSION=$(wget -qO- https://gitlab.com/gnuwget/wget/-/raw/master/.prev-version?ref_type=heads)
+        VERSION=$(cat .version)
         echo "wget_VERSION=${VERSION}" >> $GITHUB_ENV
     - name: Create Release
       uses: ncipollo/release-action@v1
