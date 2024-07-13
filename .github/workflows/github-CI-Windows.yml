@@ -49,7 +49,7 @@ jobs:
 
     # 克隆指定的仓库
     - name: Clone wget repository
-      run: git clone --recursive -j$(nproc)  https://gitlab.com/gnuwget/wget.git
+      run: git clone  -j$(nproc)  https://github.com/lifenjoiner/wget-for-windows.git
 
     - name: Generate configure
       run: |
