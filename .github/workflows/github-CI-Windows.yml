@@ -77,8 +77,8 @@ jobs:
         cd $CDir
         echo -e "all:\n\n" > gnulib_po/Makefile
         make
-        strip $CDir/src/wget.exe
-        cp -fv $CDir/src/wget.exe $CDir/src/wget0.exe
+        strip /src/wget.exe
+        cp -fv /src/wget.exe /src/wget0.exe
 
     - name: Show compiled wget info
       run: |
