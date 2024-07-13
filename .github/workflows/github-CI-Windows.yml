@@ -80,7 +80,6 @@ jobs:
 
     - name: Show compiled wget info
       run: |
-        find / -name "wget.exe" 2>/dev/null
         ls -l $CDir/src/wget.exe
         SHA=$(sha1sum $CDir/src/wget.exe | cut -b 1-40)
         echo SHA="$SHA" >> $GITHUB_ENV
