@@ -46,24 +46,14 @@ jobs:
           libcares-devel
           mingw-w64-${{env.arch}}-gcc
           mingw-w64-${{env.arch}}-gettext
-          
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+
+    # 克隆指定的仓库
+    - name: Clone wget repository
+      run: git clone https://gitlab.com/gnuwget/wget.git
 
     - name: Generate configure
       run: |
-        loc_ver=$(gettext -V | sed -n "s/gettext[^0-9]\+\([0-9.]\+\).*/\1/p")
-        req_ver=$(sed -n "s/^\gettext\s\+\([0-9.]\+\)$/\1/mp" bootstrap.conf)
-        if [ -n "${req_ver}" ] && [ ${loc_ver} \< ${req_ver} ]; then
-          echo "Reset gettext version: bootstrap.conf requires "${req_ver}", local is "${loc_ver}
-          sed -i "s/^\(gettext\s\+\)[0-9.]\+$/\1${loc_ver}/gm" bootstrap.conf
-        fi
-        req_ver=$(sed -n "s/^AM_GNU_GETTEXT_VERSION(\[\([0-9.]\+\)\])$/\1/mp" configure.ac)
-        if [ -n "${req_ver}" ] && [ ${loc_ver} \< ${req_ver} ]; then
-          echo "Reset gettext version: configure.ac requires "${req_ver}", local is "${loc_ver}
-          sed -i "s/^\(AM_GNU_GETTEXT_VERSION(\[\)[0-9.]\+\(\])\)$/\1${loc_ver}\2/gm" configure.ac
-        fi
+        cd wget # 进入克隆的仓库目录
         ./bootstrap --skip-po
         sed -i "s/-dirty\b//p" configure
 
@@ -73,6 +63,7 @@ jobs:
         tar -xvzf v0.0.8.tar.gz
         cd win-iconv-0.0.8
         make -E CFLAGS=-Os -E prefix=/$mingw install
+        cd ..
 
     - name: configure
       run: |
@@ -80,7 +71,7 @@ jobs:
         mkdir -p $CDir
         cd $CDir
         export CFLAGS+=" -Wall -D_WIN32_WINNT=0x0600 -DGNULIB_defined_ESOCK -Os"
-        LDFLAGS="-static -s" $BRoot/configure --prefix=$BRoot/$BDir --disable-debug --disable-rpath --disable-nls --without-libpsl --without-metalink --disable-pcre --disable-pcre2 --with-winidn --enable-threads=windows
+        LDFLAGS="-static -s" $BRoot/wget/configure --prefix=$BRoot/$BDir --disable-debug --disable-rpath --disable-nls --without-libpsl --without-metalink --disable-pcre --disable-pcre2 --with-winidn --enable-threads=windows
 
     - name: Build
       run: |
@@ -90,6 +81,7 @@ jobs:
 
     - name: Show compiled wget info
       run: |
+        find / -name "wget.exe" 2>/dev/null
         ls -l $CDir/src/wget.exe
         SHA=$(sha1sum $CDir/src/wget.exe | cut -b 1-40)
         echo SHA="$SHA" >> $GITHUB_ENV
@@ -102,3 +94,14 @@ jobs:
         name: wget-${{env.mingw}}-${{env.build_type}}_${{env.SHA}}
         path: |
           ${{env.CDir}}/src/wget.exe
+    - name: Get version number
+      run: |
+        VERSION=$(wget -qO- https://gitlab.com/gnuwget/wget/-/raw/master/.prev-version?ref_type=heads)
+        echo "wget_VERSION=${VERSION}" >> $GITHUB_ENV
+    - name: Create Release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: wget2-${{ env.wget_VERSION }}
+        allowUpdates: true
+        artifacts: "wget.exe"
+        token: ${{ secrets.GITHUB_TOKEN }}
