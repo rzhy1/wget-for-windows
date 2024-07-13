@@ -102,6 +102,6 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         tag: wget-${{ env.wget_VERSION }}
-        #allowUpdates: true
+        allowUpdates: true
         artifacts: "${{env.CDir}}/src/wget0.exe"
         token: ${{ secrets.GITHUB_TOKEN }}
