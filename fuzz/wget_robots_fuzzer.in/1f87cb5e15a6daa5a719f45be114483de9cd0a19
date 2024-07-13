@@ -1,5 +1,0 @@
-user-agent:wget
-disallow:
-user-agent:wget
-disallow:
-user-agent:wgat
