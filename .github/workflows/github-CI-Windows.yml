@@ -9,7 +9,7 @@ jobs:
         bits: [64]
         ftype: [static-lite]
       fail-fast: false
-    name: mingw${{matrix.bits}}-wintls-winhashes-${{matrix.ftype}}
+    name: wget-wintls
     runs-on: windows-latest
     env:
       mingw: mingw${{matrix.bits}}
