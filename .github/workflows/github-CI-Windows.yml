@@ -1,22 +1,14 @@
 name: wget-for-windows CI
 
-on: 
-  workflow_dispatch:
+on: [push, pull_request]
 
 jobs:
-  # Customize the env and configure args
-  # windows-2022 installs only pure MSYS2: https://github.com/actions/virtual-environments/issues/1572#issuecomment-908941444
-  # https://github.com/actions/virtual-environments/blob/main/images/win/scripts/Installers/Install-Msys2.ps1
-  # https://github.com/actions/virtual-environments/tree/main/images/win/toolsets
   build:
-    # https://docs.github.com/en/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     strategy:
       matrix:
-        #os: [ubuntu-latest, windows-latest] # run native test
         bits: [64]
-        ftype: [static-full, static-lite]
+        ftype: [static-lite]
       fail-fast: false
-    # https://github.com/actions/virtual-environments
     name: mingw${{matrix.bits}}-wintls-winhashes-${{matrix.ftype}}
     runs-on: windows-latest
     env:
@@ -29,14 +21,7 @@ jobs:
     - name: Set up ENVs for MSYS2 to inherit
       shell: bash
       run: |
-        # Explicitly enable year2038:
-        # gnulib requires `-D__MINGW_USE_VC2005_COMPAT` for `time_t` from `year2038.m4` and `largefile.m4`.
-        # gnulib/doc/posix-headers/sys_time.texi
-        case "${mingw}" in
-          mingw32) arch="i686"; echo CFLAGS="-D__MINGW_USE_VC2005_COMPAT=1" >> $GITHUB_ENV ;;
-          mingw64) arch="x86_64" ;;
-          *) exit 1 ;;
-        esac
+        arch="x86_64"
         BRoot="${PWD}"
         BDir="build/${build_type}/${mingw}"
         CDir="${BDir}-config"
@@ -45,18 +30,11 @@ jobs:
         echo BDir="$BDir" >> $GITHUB_ENV
         echo CDir="$CDir" >> $GITHUB_ENV
 
-      # https://github.com/msys2/setup-msys2
     - name: Set up MSYS2
       uses: msys2/setup-msys2@v2
       with:
         msystem: ${{env.mingw}}
         release: false
-        #path-type: inherit
-        # `AX_CODE_COVERAGE` requires autoconf-archive: https://github.com/google/oss-fuzz/pull/5379/files
-        # gpgme for metalink, but depends on many others, that's not preferred on windows
-        # gettext for NLS, expat for metalink, libidn2 and libunistring for libpsl
-        # mingw-w64-${{env.arch}}-libmetalink is removed from MSYS2 repo, compile and install it ourself.
-        # pacman group: https://packages.msys2.org/group/
         install: >-
           base-devel
           gperf
@@ -65,123 +43,38 @@ jobs:
           autoconf-archive
           git
           python
-          libcares
           libcares-devel
-          gcc
           mingw-w64-${{env.arch}}-gcc
-          mingw-w64-${{env.arch}}-expat
-          mingw-w64-${{env.arch}}-gpgme
-          mingw-w64-${{env.arch}}-libpsl
-          mingw-w64-${{env.arch}}-python-pycares
-          mingw-w64-${{env.arch}}-libidn2
-          mingw-w64-${{env.arch}}-libunistring
-          mingw-w64-${{env.arch}}-gettext
-          mingw-w64-${{env.arch}}-pcre2  
-          mingw-w64-${{env.arch}}-zlib
-    - name: 更新 MSYS2 软件包数据库和已安装软件包
-      run: |
-        pacman -Sc  --noconfirm
-        pacman -Syu --noconfirm
-      
-      # In here, test requires linux flavor python!
-    - name: Hack python
-      run: |
-        python -V
-        python -c "import sys; print(sys.executable)"
-        python3 -V
-        python3 -c "import sys; print(sys.executable)"
-        rm /$mingw/bin/python* 2>/dev/null
-        #pacman -R -dd --noconfirm mingw-w64-${{env.arch}}-python 2>/dev/null
-        python.exe -V
-        python.exe -c "import sys; print(sys.executable)"
-
-      # MinGW-w64 pre-installed
-    - name: Show setup result
-      run: |
-        echo "ls /"
-        ls /
-        echo "bash --version"
-        bash --version
-        echo "gcc -v"
-        gcc -v
-        git --version
-        python -V
-        python -c "import sys; print(sys.executable)"
-        python3 -V
-        python3 -c "import sys; print(sys.executable)"
-        perl -e 'print $^O . "\n"'
-        pwd
-        echo "PATH"
-        echo "$PATH"
-        echo "$BRoot"
-        echo "$BDir"
-        echo "$CDir"
 
     - uses: actions/checkout@v4
-      # Shallow fetch makes version unknown: git describe --abbrev=4 --match="$prefix*" HEAD
       with:
         fetch-depth: 0
 
-      # gettext-0.20 issue: https://github.com/coreutils/gnulib/blob/master/build-aux/po/Makefile.in.in#L11
-      # gettext and gettext-devel v0.20 is not available on MSYS2
-      # wget => gnulib_po => gnulib/build-aux/po/Makefile.in.in, po/Makefile.in.in from MSYS2 gettext
     - name: Generate configure
       run: |
-        loc_ver=$(gettext -V | sed -n "s/gettext[^0-9]\+\([0-9.]\+\).*/\1/p")
-        req_ver=$(sed -n "s/^\gettext\s\+\([0-9.]\+\)$/\1/mp" bootstrap.conf)
-        if [ -n "${req_ver}" ] && [ ${loc_ver} \< ${req_ver} ]; then
-          echo "Reset gettext version: bootstrap.conf requires "${req_ver}", local is "${loc_ver}
-          sed -i "s/^\(gettext\s\+\)[0-9.]\+$/\1${loc_ver}/gm" bootstrap.conf
-        fi
-        req_ver=$(sed -n "s/^AM_GNU_GETTEXT_VERSION(\[\([0-9.]\+\)\])$/\1/mp" configure.ac)
-        if [ -n "${req_ver}" ] && [ ${loc_ver} \< ${req_ver} ]; then
-          echo "Reset gettext version: configure.ac requires "${req_ver}", local is "${loc_ver}
-          sed -i "s/^\(AM_GNU_GETTEXT_VERSION(\[\)[0-9.]\+\(\])\)$/\1${loc_ver}\2/gm" configure.ac
-        fi
         ./bootstrap --skip-po
         sed -i "s/-dirty\b//p" configure
 
-# -->
-    - name: Install extra dependencies
+    - name: Install win-iconv
       run: |
-        if [ "${{matrix.ftype}}" = "static-full" ]; then
-          # 使用缓存
-          wget https://github.com/metalink-dev/libmetalink/releases/download/release-0.1.3/libmetalink-0.1.3.tar.gz || exit 1
-          tar -xvzf libmetalink-0.1.3.tar.gz || exit 1
-          cd libmetalink-0.1.3
-          ./configure --disable-xmltest || exit 1
-          make install || exit 1
-        elif [ "${{matrix.ftype}}" = "static-lite" ]; then
-          # 使用缓存
-          wget https://github.com/win-iconv/win-iconv/archive/refs/tags/v0.0.8.tar.gz || exit 1
-          tar -xvzf v0.0.8.tar.gz || exit 1
-          cd win-iconv-0.0.8
-          make -E CFLAGS=-Os -E prefix=/$mingw install || exit 1
-        fi
+        wget https://github.com/win-iconv/win-iconv/archive/refs/tags/v0.0.8.tar.gz
+        tar -xvzf v0.0.8.tar.gz
+        cd win-iconv-0.0.8
+        make -E CFLAGS=-Os -E prefix=/$mingw install
 
     - name: configure
       run: |
         mkdir -p $BDir
         mkdir -p $CDir
         cd $CDir
-        pwd
-        # 合并 CFLAGS 和 LDFLAGS 定义，并移除冗余选项
-        CFLAGS="-Os -Wall -D_WIN32_WINNT=0x0600"
-        LDFLAGS="-static -s"
-        if [ "${{matrix.ftype}}" = "static-full" ]; then
-          $BRoot/configure --prefix=$BRoot/$BDir --disable-debug --disable-valgrind-tests --enable-iri --enable-pcre2 --with-included-libunistring --with-cares --with-libpsl --with-metalink --host="x86_64-w64-mingw32" || exit 1
-        elif [ "${{matrix.ftype}}" = "static-lite" ]; then
-          $BRoot/configure --prefix=$BRoot/$BDir --enable-threads=windows --host="x86_64-w64-mingw32" || exit 1
-        fi
-# <--
+        export CFLAGS+=" -Wall -D_WIN32_WINNT=0x0600 -DGNULIB_defined_ESOCK -Os"
+        LDFLAGS="-static -s" $BRoot/configure --prefix=$BRoot/$BDir --disable-debug --disable-rpath --disable-nls --without-libpsl --without-metalink --disable-pcre --disable-pcre2 --with-winidn --enable-threads=windows
 
-      # gnulib_po gettext requires gettext version 0.20 higher env can have!
     - name: Build
       run: |
-        echo $PKG_CONFIG_PATH
         cd $CDir
-        pkg-config --list-all
-        make -j$(nproc) || exit 1
+        echo -e "all:\n\n" > gnulib_po/Makefile
+        make
 
     - name: Show compiled wget info
       run: |
@@ -189,7 +82,7 @@ jobs:
         SHA=$(sha1sum $CDir/src/wget.exe | cut -b 1-40)
         echo SHA="$SHA" >> $GITHUB_ENV
         $CDir/src/wget -V
-    
+
     - name: Upload wget
       uses: actions/upload-artifact@v4
       if: ${{success()}} || ${{failure()}}
