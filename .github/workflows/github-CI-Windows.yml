@@ -78,7 +78,7 @@ jobs:
         echo -e "all:\n\n" > gnulib_po/Makefile
         make -j$(nproc)
         strip ${PWD}/src/wget.exe
-        cp -fv /src/wget.exe /src/wget0.exe
+        cp -fv ${PWD}/src/wget.exe ${PWD}/src/wget0.exe
 
     - name: Show compiled wget info
       run: |
