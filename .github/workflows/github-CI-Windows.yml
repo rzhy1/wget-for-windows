@@ -80,6 +80,7 @@ jobs:
         strip ${PWD}/src/wget.exe
         cp -fv ${PWD}/src/wget.exe ${PWD}/src/wget0.exe
         find "${PWD}" -name ".version" -print
+        cat .version
 
     - name: Show compiled wget info
       run: |
