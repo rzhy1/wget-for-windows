@@ -97,7 +97,7 @@ jobs:
           ${{env.CDir}}/src/wget0.exe
     - name: Get version number
       run: |
-        VERSION=$(cat .version)
+        VERSION=$(cat ${{env.CDir}}/.version)
         echo "wget_VERSION=${VERSION}" >> $GITHUB_ENV
     - name: Create Release
       uses: ncipollo/release-action@v1
