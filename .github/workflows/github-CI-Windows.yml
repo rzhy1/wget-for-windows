@@ -12,13 +12,13 @@ jobs:
     strategy:
       matrix:
         bits: [64]
-        ftype: [static-lite]
+        ftype: [wintls-static-lite,openssl-lite]
       fail-fast: false
     name: wget-wintls
     runs-on: windows-latest
     env:
       mingw: mingw${{matrix.bits}}
-      build_type: wintls-winhashes-${{matrix.ftype}}
+      build_type: ${{matrix.ftype}}
     defaults:
       run:
         shell: msys2 {0}
@@ -51,6 +51,7 @@ jobs:
           libcares-devel
           mingw-w64-${{env.arch}}-gcc
           mingw-w64-${{env.arch}}-gettext
+          mingw-w64-${{env.arch}}-openssl
 
     # 克隆指定的仓库
     - name: Clone wget repository
@@ -74,8 +75,12 @@ jobs:
         mkdir -p $BDir
         mkdir -p $CDir
         cd $CDir
-        export CFLAGS+=" -Wall -D_WIN32_WINNT=0x0600 -DGNULIB_defined_ESOCK -Os"
-        LDFLAGS="-static -s" $BRoot/wget/configure --prefix=$BRoot/$BDir --disable-debug --disable-rpath --disable-nls --without-libpsl --without-metalink --disable-pcre --disable-pcre2 --with-winidn --enable-threads=windows
+        export CFLAGS+=" -Wall -DGNULIB_defined_ESOCK -DSite=https://github.com/lifenjoiner/wget-for-windows"
+        if [ "${{matrix.ftype}}" = "wintls-winhashes-static-lite" ]; then
+          CFLAGS+=" -D_WIN32_WINNT=0x0600 -Os" LDFLAGS="-static -s" $BRoot/wget/configure --prefix=$BRoot/$BDir --disable-debug --disable-rpath --disable-nls --without-libpsl --without-metalink --disable-pcre --disable-pcre2 --with-winidn --enable-threads=windows
+        elif [ "${{matrix.ftype}}" = "openssl-lite" ]; then
+          CFLAGS+=" -Os" LDFLAGS="-static -s" $BRoot/wget/configure --prefix=$BRoot/$BDir --with-ssl=openssl --disable-debug --disable-rpath --disable-nls --without-libpsl --without-metalink --disable-pcre --disable-pcre2 --with-winidn --enable-threads=windows
+        fi
 
     - name: Build
       run: |
