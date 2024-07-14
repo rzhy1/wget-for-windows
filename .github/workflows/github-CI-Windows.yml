@@ -55,7 +55,7 @@ jobs:
 
     # 克隆指定的仓库
     - name: Clone wget repository
-      run: git clone  https://github.com/lifenjoiner/wget-for-windows.git wget
+      run: git clone --branch openssl-test https://github.com/lifenjoiner/wget-for-windows.git wget
 
     - name: Generate configure
       run: |
@@ -88,12 +88,12 @@ jobs:
         echo -e "all:\n\n" > gnulib_po/Makefile
         make -j$(nproc)
         strip ${PWD}/src/wget.exe
-        cp -fv ${PWD}/src/wget.exe ${PWD}/src/wget0.exe
+        cp -fv ${PWD}/src/wget.exe ${PWD}/src/wget-${{matrix.ftype}}.exe
 
     - name: Show compiled wget info
       run: |
-        ls -l $CDir/src/wget0.exe
-        SHA=$(sha1sum $CDir/src/wget0.exe | cut -b 1-40)
+        ls -l $CDir/src/wget-${{matrix.ftype}}.exe
+        SHA=$(sha1sum $CDir/src/wget-${{matrix.ftype}}.exe | cut -b 1-40)
         echo SHA="$SHA" >> $GITHUB_ENV
         $CDir/src/wget -V
 
@@ -103,7 +103,7 @@ jobs:
       with:
         name: wget-${{env.mingw}}-${{env.build_type}}_${{env.SHA}}
         path: |
-          ${{env.CDir}}/src/wget0.exe
+          ${{env.CDir}}/src/wget-${{matrix.ftype}}.exe
     - name: Get version number
       run: |
         VERSION=$(cat ${{env.CDir}}/.version)
@@ -113,5 +113,5 @@ jobs:
       with:
         tag: wget-${{ env.wget_VERSION }}
         allowUpdates: true
-        artifacts: "${{env.CDir}}/src/wget0.exe"
+        artifacts: "${{env.CDir}}/src/wget-${{matrix.ftype}}.exe"
         token: ${{ secrets.GITHUB_TOKEN }}
