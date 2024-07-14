@@ -76,7 +76,7 @@ jobs:
         mkdir -p $CDir
         cd $CDir
         export CFLAGS+=" -Wall -DGNULIB_defined_ESOCK -DSite=https://github.com/lifenjoiner/wget-for-windows"
-        if [ "${{matrix.ftype}}" = "wintls-winhashes-static-lite" ]; then
+        if [ "${{matrix.ftype}}" = "wintls-static-lite" ]; then
           CFLAGS+=" -D_WIN32_WINNT=0x0600 -Os" LDFLAGS="-static -s" $BRoot/wget/configure --prefix=$BRoot/$BDir --disable-debug --disable-rpath --disable-nls --without-libpsl --without-metalink --disable-pcre --disable-pcre2 --with-winidn --enable-threads=windows
         elif [ "${{matrix.ftype}}" = "openssl-lite" ]; then
           CFLAGS+=" -Os" LDFLAGS="-static -s" $BRoot/wget/configure --prefix=$BRoot/$BDir --with-ssl=openssl --disable-debug --disable-rpath --disable-nls --without-libpsl --without-metalink --disable-pcre --disable-pcre2 --with-winidn --enable-threads=windows
