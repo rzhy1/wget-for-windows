@@ -72,7 +72,7 @@ jobs:
           win-iconv-mutex
 
     - name: Install win-iconv (Build)
-      if: steps.Install-win-iconv-(Cache).outputs.cache-hit != 'true'
+      if: steps.Install-win-iconv-Cache.outputs.cache-hit != 'true'
       run: |
         wget -O- https://github.com/win-iconv/win-iconv/archive/refs/tags/v0.0.8.tar.gz | tar xz -C "${{ runner.temp }}"
         cd "${{ runner.temp }}/win-iconv-0.0.8"
