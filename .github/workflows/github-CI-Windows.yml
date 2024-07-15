@@ -67,7 +67,8 @@ jobs:
       run: |
         wget -O- https://github.com/win-iconv/win-iconv/archive/refs/tags/v0.0.8.tar.gz | tar xz 
         cd win-iconv-0.0.8
-        make -j$(nproc) CFLAGS=-Os prefix=$INSTALLDIR install
+        make -j$(nproc) CFLAGS=-Os prefix=/$mingw install
+        
         cd ..
 
     - name: configure
