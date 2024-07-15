@@ -71,6 +71,7 @@ jobs:
           make -j$(nproc) CFLAGS=-Os prefix=/$mingw install
         elif [ "${{matrix.ftype}}" = "openssl-lite" ]; then
           make -j$(nproc) CFLAGS=-Os prefix=/$INSTALLDIR install
+        fi
         cd ..
 
     - name: configure
