@@ -53,6 +53,95 @@ jobs:
           mingw-w64-${{env.arch}}-gettext
           mingw-w64-${{env.arch}}-openssl
 
+    - name: Install dependencies for wget-openssl
+      run: |
+        if [ "${{matrix.ftype}}" = "openssl-lite" ]; then
+          wget -O- https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.50.tar.gz | tar xz
+          cd libgpg-error-* || exit
+          ./configure \
+          --host=x86_64-w64-mingw32 \
+          --disable-shared \
+          --prefix="$BRoot/$BDir" \
+          --enable-static \
+          --disable-doc
+          make -j$(nproc)
+          make install
+          cd ..
+
+          wget -O- https://gnupg.org/ftp/gcrypt/libassuan/libassuan-3.0.1.tar.bz2 | tar xj
+          cd libassuan-* || exit
+          ./configure \
+          --host=x86_64-w64-mingw32 \
+          --disable-shared \
+          --prefix="$BRoot/$BDir" \
+          --enable-static \
+          --disable-doc \
+          --with-libgpg-error-prefix="$BRoot/$BDir"
+          make -j$(nproc)
+          make install
+          cd ..
+          
+          wget -O- https://gnupg.org/ftp/gcrypt/gpgme/gpgme-1.23.2.tar.bz2 | tar xj
+          cd gpgme-* || exit
+          env PYTHON=/usr/bin/python3.11 ./configure \
+          --host=x86_64-w64-mingw32 \
+          --disable-shared \
+          --prefix="$BRoot/$BDir" \
+          --enable-static \
+          --with-libgpg-error-prefix="$BRoot/$BDir" \
+          --disable-gpg-test \
+          --disable-g13-test \
+          --disable-gpgsm-test \
+          --disable-gpgconf-test \
+          --disable-glibtest \
+          --with-libassuan-prefix="$BRoot/$BDir"
+          make -j$(nproc)
+          make install
+          cd ..
+          wget -O- https://github.com/libexpat/libexpat/releases/download/R_2_6_2/expat-2.6.2.tar.gz | tar xz
+          cd expat-* || exit
+          ./configure \
+          --host=x86_64-w64-mingw32 \
+          --disable-shared \
+          --prefix="$BRoot/$BDir" \
+          --enable-static \
+          --without-docbook \
+          --without-tests \
+          --with-libgpg-error-prefix="$BRoot/$BDir"
+          make -j$(nproc)
+          make install
+          cd ..
+  
+          wget -O- https://github.com/metalink-dev/libmetalink/releases/download/release-0.1.3/libmetalink-0.1.3.tar.gz | tar xz
+          cd libmetalink-* || exit
+          EXPAT_CFLAGS="-I$BRoot/$BDir/include" \
+          EXPAT_LIBS="-L$BRoot/$BDir/lib -lexpat" \
+          ./configure \
+          --host=x86_64-w64-mingw32 \
+          --disable-shared \
+          --prefix="$BRoot/$BDir" \
+          --enable-static \
+         --with-libgpg-error-prefix="$BRoot/$BDir" \
+          --with-libexpat
+          make -j$(nproc)
+          make install
+          cd ..
+          
+          wget -O- https://github.com/c-ares/c-ares/releases/download/v1.32.2/c-ares-1.32.2.tar.gz | tar xz
+          cd c-ares-* || exit
+          CPPFLAGS="-DCARES_STATICLIB=1" \
+          ./configure \
+          --host=x86_64-w64-mingw32 \
+          --disable-shared \
+          --prefix="$BRoot/$BDir" \
+          --enable-static \
+          --disable-tests \
+          --disable-debug
+          make -j$(nproc)
+          make install
+          cd ..
+        fi  
+        
     # 克隆指定的仓库
     - name: Clone wget repository
       run: git clone --branch openssl-test https://github.com/lifenjoiner/wget-for-windows.git wget
