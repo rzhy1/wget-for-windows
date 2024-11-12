@@ -23,6 +23,14 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
+    - name: Cache ccache
+      uses: actions/cache@v4
+      with:
+        path: ~/.ccache
+        key: ccache-${{ runner.os }}-${{ env.mingw }}-${{ env.build_type }}-${{ hashFiles('**/*.c', '**/*.h', 'wget/configure') }}
+        restore-keys: |
+          ccache-${{ runner.os }}-${{ env.mingw }}-${{ env.build_type }}-
+          
     - name: Set up ENVs for MSYS2 to inherit
       shell: bash
       run: |
@@ -69,7 +77,14 @@ jobs:
         cd win-iconv-0.0.8
         make -E CFLAGS=-Os prefix=/$mingw install
         cd ..
-
+    # 配置 ccache 以提高编译速度
+    - name: Configure ccache
+      run: |
+        export CCACHE_DIR="$HOME/.ccache"
+        export CCACHE_MAXSIZE=2000M
+        export CC="ccache gcc"
+        export CXX="ccache g++"
+        ccache -z  # 重置统计信息
     - name: configure
       run: |
         mkdir -p $BDir
@@ -96,7 +111,9 @@ jobs:
         SHA=$(sha1sum $CDir/src/wget-${{matrix.ftype}}.exe | cut -b 1-40)
         echo SHA="$SHA" >> $GITHUB_ENV
         $CDir/src/wget -V
-
+    # 显示 ccache 统计信息
+    - name: Show ccache stats
+      run: ccache -s -v
     - name: Upload wget
       uses: actions/upload-artifact@v4
       if: ${{success()}} || ${{failure()}}
