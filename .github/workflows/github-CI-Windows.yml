@@ -96,8 +96,7 @@ jobs:
         SHA=$(sha1sum $CDir/src/wget-${{matrix.ftype}}.exe | cut -b 1-40)
         echo SHA="$SHA" >> $GITHUB_ENV
         $CDir/src/wget -V
-    - name: Show ccache stats
-      run: ccache -s -v
+
     - name: Upload wget
       uses: actions/upload-artifact@v4
       if: ${{success()}} || ${{failure()}}
