@@ -41,6 +41,7 @@ jobs:
         msystem: ${{env.mingw}}
         release: false
         install: >-
+          pkgconf
           base-devel
           gperf
           autoconf
