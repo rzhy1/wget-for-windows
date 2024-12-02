@@ -50,6 +50,7 @@ jobs:
           git
           python
           libcares-devel
+          mingw-w64-${{env.arch}}-gpgme
           mingw-w64-${{env.arch}}-gcc
           mingw-w64-${{env.arch}}-gettext
           mingw-w64-${{env.arch}}-openssl
