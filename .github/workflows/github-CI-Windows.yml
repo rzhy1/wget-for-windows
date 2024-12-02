@@ -66,8 +66,10 @@ jobs:
 
     - name: Install win-iconv (Build)
       run: |
-        wget -O- https://github.com/win-iconv/win-iconv/archive/refs/tags/v0.0.8.tar.gz | tar xz
-        cd win-iconv-0.0.8
+        #wget -O- https://github.com/win-iconv/win-iconv/archive/refs/tags/v0.0.8.tar.gz | tar xz
+        #cd win-iconv-0.0.8
+        git https://github.com/gajgeospatial/win-iconv-1.0.0.git win-iconv
+        cd win-iconv
         make -E CFLAGS=-Os prefix=/$mingw install
         cd ..
         
