@@ -58,14 +58,7 @@ jobs:
     # 克隆指定的仓库
     - name: Clone wget repository
       run: git clone --branch mydev https://github.com/lifenjoiner/wget-for-windows.git wget
-    - name: Install win-iconv (Build)
-      run: |
-        #wget -O- https://github.com/win-iconv/win-iconv/archive/refs/tags/v0.0.8.tar.gz | tar xz
-        #cd win-iconv-0.0.8
-        git clone -j$(nproc) https://github.com/gajgeospatial/win-iconv-1.0.0.git win-iconv
-        cd win-iconv
-        make -E CFLAGS=-Os prefix=/$mingw install
-        cd ..
+   
     - name: Generate configure
       run: |
         cd wget # 进入克隆的仓库目录
@@ -74,8 +67,6 @@ jobs:
 
     - name: Install win-iconv (Build)
       run: |
-        #wget -O- https://github.com/win-iconv/win-iconv/archive/refs/tags/v0.0.8.tar.gz | tar xz
-        #cd win-iconv-0.0.8
         git clone -j$(nproc) https://github.com/gajgeospatial/win-iconv-1.0.0.git win-iconv
         cd win-iconv
         make -E CFLAGS=-Os prefix=/$mingw install
